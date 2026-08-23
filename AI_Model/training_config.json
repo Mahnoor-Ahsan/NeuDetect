@@ -1,0 +1,16 @@
+{
+    "model": "ResNet50",
+    "task": "Brain Tumor Classification",
+    "classes": [
+        "glioma",
+        "meningioma",
+        "notumor",
+        "pituitary"
+    ],
+    "image_size": "224x224",
+    "dataset": "Masoud Nickparvar Brain Tumor MRI Dataset",
+    "optimizer": "Adam",
+    "loss": "categorical_crossentropy",
+    "explainability": "Grad-CAM",
+    "framework": "TensorFlow Keras"
+}

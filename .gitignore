@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Large ML model files
+*.keras
+*.h5
+*.hdf5
+*.pt
+*.pth
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated uploads/results
+Backend/app/uploads/*
+Backend/app/results/*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.dbss

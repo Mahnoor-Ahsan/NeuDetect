@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,7 +8,7 @@ import StatCard from "@/components/dashboard/StatCard";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import QuickActions from "@/components/dashboard/QuickActions";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 type UserProfile = {
   id: number;
@@ -264,7 +264,7 @@ export default function DashboardPage() {
                 ? "..."
                 : latestAnalysis
                   ? `${latestConfidence.toFixed(1)}%`
-                  : "—"
+                  : "â€”"
             }
             description="Most recent model confidence"
           />

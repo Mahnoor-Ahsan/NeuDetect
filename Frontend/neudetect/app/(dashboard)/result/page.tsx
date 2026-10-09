@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,7 @@ type AnalysisData = {
   analyzedAt?: string;
 };
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 export default function ResultPage() {
   const router = useRouter();
@@ -264,15 +264,15 @@ export default function ResultPage() {
 
               <p className="mt-1 text-sm text-slate-500">
                 {analysis.patient?.age ||
-                  "—"}{" "}
+                  "â€”"}{" "}
                 years
 
                 <span className="mx-2 text-slate-300">
-                  •
+                  â€¢
                 </span>
 
                 {analysis.patient?.gender ||
-                  "—"}
+                  "â€”"}
               </p>
             </div>
 

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 type PatientData = {
   name: string;
@@ -431,7 +431,7 @@ export default function HistoryPage() {
 
                     <div className="flex items-center justify-end">
                       <span className="text-sm font-semibold text-slate-400 transition group-hover:text-blue-600">
-                        View →
+                        View â†’
                       </span>
                     </div>
                   </div>

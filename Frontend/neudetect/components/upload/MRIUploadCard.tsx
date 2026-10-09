@@ -20,24 +20,19 @@ export default function MRIUploadCard({
   onFileSelect,
 }: MRIUploadCardProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
 
   useEffect(() => {
-    if (!file) {
-      setPreviewUrl("");
-      return;
-    }
-
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-
     return () => {
-      URL.revokeObjectURL(url);
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
     };
-  }, [file]);
+  }, []);
 
   function validateFile(selectedFile: File) {
     setError("");
@@ -56,11 +51,23 @@ export default function MRIUploadCard({
   }
 
   function handleFile(selectedFile: File | undefined) {
-    if (!selectedFile) return;
-
-    if (validateFile(selectedFile)) {
-      onFileSelect(selectedFile);
+    if (!selectedFile) {
+      return;
     }
+
+    if (!validateFile(selectedFile)) {
+      return;
+    }
+
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+    }
+
+    const newPreviewUrl = URL.createObjectURL(selectedFile);
+
+    previewUrlRef.current = newPreviewUrl;
+    setPreviewUrl(newPreviewUrl);
+    onFileSelect(selectedFile);
   }
 
   function handleInputChange(
@@ -77,6 +84,12 @@ export default function MRIUploadCard({
   }
 
   function removeFile() {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+
+    setPreviewUrl("");
     onFileSelect(null);
 
     if (inputRef.current) {

@@ -43,60 +43,115 @@ export default function HistoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function loadHistory() {
-    try {
-      setIsLoading(true);
-      setError("");
-
-      const token = sessionStorage.getItem(
-        "neudetect_access_token"
-      );
-
-      if (!token) {
-        router.replace("/login");
-        return;
-      }
-
-      const response = await fetch(
-        `${API_URL}/analyses/`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          cache: "no-store",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to load analyses: ${response.status}`
-        );
-      }
-
-      const data: ApiAnalysisRecord[] =
-        await response.json();
-
-      setHistory(data);
-    } catch (error) {
-      console.error(
-        "Could not load analysis history:",
-        error
-      );
-
-      setHistory([]);
-
-      setError(
-        "We could not load your analysis history. Please make sure the NeuDetect backend is running."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   useEffect(() => {
+    const token = sessionStorage.getItem(
+      "neudetect_access_token"
+    );
+
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadHistory() {
+      try {
+        setIsLoading(true);
+        setError("");
+
+        const response = await fetch(
+          `${API_URL}/analyses/`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+            },
+            cache: "no-store",
+          }
+        );
+
+        if (response.status === 401) {
+          if (!cancelled) {
+            setError(
+              "Your session has expired. Please sign in again."
+            );
+          }
+
+          sessionStorage.removeItem(
+            "neudetect_access_token"
+          );
+          sessionStorage.removeItem("neudetect_user");
+
+          if (!cancelled) {
+            router.replace("/login");
+          }
+
+          return;
+        }
+
+        if (!response.ok) {
+          let detail = "";
+
+          try {
+            const errorData = await response.json();
+
+            if (
+              errorData &&
+              typeof errorData.detail === "string"
+            ) {
+              detail = errorData.detail;
+            }
+          } catch {
+            // Ignore non-JSON error responses.
+          }
+
+          throw new Error(
+            detail ||
+              `Failed to load analyses: ${response.status}`
+          );
+        }
+
+        const data =
+          (await response.json()) as ApiAnalysisRecord[];
+
+        if (cancelled) {
+          return;
+        }
+
+        setHistory(data);
+        setError("");
+      } catch (historyError) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error(
+          "Could not load analysis history:",
+          historyError
+        );
+
+        setHistory([]);
+
+        setError(
+          historyError instanceof Error
+            ? historyError.message
+            : "We could not load your analysis history. Please make sure the NeuDetect backend is running."
+        );
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
     loadHistory();
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   const filteredHistory = useMemo(() => {
     return history.filter((record) => {
@@ -112,9 +167,16 @@ export default function HistoryPage() {
         patientName.includes(searchValue) ||
         prediction.includes(searchValue);
 
+      const filterValue =
+        filter === "All"
+          ? null
+          : filter === "No Tumor"
+            ? "notumor"
+            : filter.toLowerCase();
+
       const matchesFilter =
-        filter === "All" ||
-        prediction === filter.toLowerCase();
+        filterValue === null ||
+        prediction === filterValue;
 
       return matchesSearch && matchesFilter;
     });
@@ -234,10 +296,11 @@ export default function HistoryPage() {
                 key={option}
                 type="button"
                 onClick={() => setFilter(option)}
-                className={`rounded-xl px-4 py-2.5 text-sm font-medium transition ${filter === option
-                  ? "bg-slate-900 text-white"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                  }`}
+                className={`rounded-xl px-4 py-2.5 text-sm font-medium transition ${
+                  filter === option
+                    ? "bg-slate-900 text-white"
+                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
               >
                 {option}
               </button>
@@ -312,7 +375,9 @@ export default function HistoryPage() {
 
                     <div>
                       <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold capitalize text-blue-700">
-                        {record.prediction}
+                        {record.prediction === "notumor"
+                          ? "No Tumor"
+                          : record.prediction}
                       </span>
                     </div>
 
@@ -342,22 +407,22 @@ export default function HistoryPage() {
                       <p className="text-sm text-slate-600">
                         {record.analyzedAt
                           ? new Date(
-                            record.analyzedAt
-                          ).toLocaleDateString()
+                              record.analyzedAt
+                            ).toLocaleDateString()
                           : "Unknown"}
                       </p>
 
                       <p className="mt-1 text-xs text-slate-400">
                         {record.analyzedAt
                           ? new Date(
-                            record.analyzedAt
-                          ).toLocaleTimeString(
-                            [],
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )
+                              record.analyzedAt
+                            ).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )
                           : ""}
                       </p>
                     </div>

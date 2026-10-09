@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import Button from "@/components/ui/Button";
@@ -145,7 +146,7 @@ export default function LoginPage() {
           <Input
             label="Password"
             type="password"
-            placeholder="••••••••"
+            placeholder="Enter your password"
             value={password}
             onChange={(event) =>
               setPassword(event.target.value)
@@ -161,6 +162,19 @@ export default function LoginPage() {
             {isLoggingIn ? "Signing in..." : "Login"}
           </Button>
         </form>
+
+        <div className="mt-6 border-t border-slate-100 pt-6 text-center">
+          <p className="text-sm text-slate-500">
+            Don&apos;t have an account?
+          </p>
+
+          <Link
+            href="/register"
+            className="mt-1 inline-block text-sm font-semibold text-blue-600 transition hover:text-blue-700"
+          >
+            Create an account
+          </Link>
+        </div>
       </Card>
     </main>
   );

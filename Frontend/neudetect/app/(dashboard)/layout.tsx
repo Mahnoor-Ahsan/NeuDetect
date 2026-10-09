@@ -13,8 +13,11 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
 
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] =
+    useState(true);
+
+  const [isAuthenticated, setIsAuthenticated] =
+    useState(false);
 
   useEffect(() => {
     const token = sessionStorage.getItem(
@@ -22,6 +25,8 @@ export default function DashboardLayout({
     );
 
     if (!token) {
+      setIsAuthenticated(false);
+      setIsCheckingAuth(false);
       router.replace("/login");
       return;
     }

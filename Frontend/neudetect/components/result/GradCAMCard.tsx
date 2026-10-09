@@ -19,9 +19,9 @@ export default function GradCAMCard({
         </h2>
 
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-          Grad-CAM highlights image regions that contributed to the model's
-          prediction. It provides an explanation of model attention, not a
-          medical diagnosis.
+          Grad-CAM highlights image regions that contributed to the
+          model&apos;s prediction. It provides an explanation of model
+          attention, not a medical diagnosis.
         </p>
       </div>
 

@@ -10,7 +10,8 @@ import Input from "@/components/ui/Input";
 const API_URL = "http://127.0.0.1:8000";
 
 type RegisterResponse = {
-  message: string;
+  access_token: string;
+  token_type: string;
   user: {
     id: number;
     name: string;
@@ -27,14 +28,12 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("radiologist");
   const [institution, setInstitution] = useState("");
 
   const [error, setError] = useState("");
-  const [isRegistering, setIsRegistering] =
-    useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   async function handleRegister(
     event: React.FormEvent<HTMLFormElement>
@@ -44,10 +43,8 @@ export default function RegisterPage() {
     setError("");
 
     const trimmedName = name.trim();
-    const normalizedEmail =
-      email.trim().toLowerCase();
-    const trimmedInstitution =
-      institution.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+    const trimmedInstitution = institution.trim();
 
     if (!trimmedName) {
       setError("Please enter your full name.");
@@ -86,16 +83,15 @@ export default function RegisterPage() {
             email: normalizedEmail,
             password,
             role,
-            institution:
-              trimmedInstitution || null,
+            institution: trimmedInstitution || null,
           }),
         }
       );
 
       const data =
         (await response.json()) as
-          | RegisterResponse
-          | { detail?: string };
+        | RegisterResponse
+        | { detail?: string };
 
       if (!response.ok) {
         throw new Error(
@@ -105,7 +101,19 @@ export default function RegisterPage() {
         );
       }
 
-      router.push("/login");
+      const result = data as RegisterResponse;
+
+      sessionStorage.setItem(
+        "neudetect_access_token",
+        result.access_token
+      );
+
+      sessionStorage.setItem(
+        "neudetect_user",
+        JSON.stringify(result.user)
+      );
+
+      router.push("/dashboard");
     } catch (registerError) {
       console.error(
         "Registration error:",
@@ -161,7 +169,7 @@ export default function RegisterPage() {
         >
           <Input
             label="Full name"
-            placeholder="Dr. Mahnoor"
+            placeholder="Enter your full name"
             value={name}
             onChange={(event) =>
               setName(event.target.value)

@@ -60,7 +60,6 @@ def register_user(
             status_code=409,
             detail="An account with this email already exists.",
         )
-
     user = User(
         name=data.name.strip(),
         email=email,
@@ -78,8 +77,17 @@ def register_user(
     db.commit()
     db.refresh(user)
 
+    access_token = create_access_token(
+        {
+            "sub": str(user.id),
+            "email": user.email,
+            "role": user.role,
+        }
+    )
+
     return {
-        "message": "User registered successfully.",
+        "access_token": access_token,
+        "token_type": "bearer",
         "user": {
             "id": user.id,
             "name": user.name,
